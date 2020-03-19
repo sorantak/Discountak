@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration 	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.codepresso.discountak.domain.UserVO"  alias="userVO" />
+		<typeAlias type="com.codepresso.discountak.domain.TokenVO"  alias="tokenVO" />
+		<typeAlias type="com.codepresso.discountak.domain.ProdVO"  alias="prodVO" />
+		<typeAlias type="com.codepresso.discountak.domain.BasketVO"  alias="basketVO" />
+		<typeAlias type="com.codepresso.discountak.domain.ProdDetailVO"  alias="prodDetailVO" />
+		<typeAlias type="com.codepresso.discountak.domain.UserAndProdVO"  alias="userAndProdVO" />
+		<!-- 
+		<typeAlias type="com.codepresso.discountak.domain.BannerVO"  alias="bannerVO" />
+		-->
+	</typeAliases>
+</configuration>

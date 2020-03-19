@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mybatis.mappers.user">
+
+	<resultMap type="userVO" id="userResult">
+		<result column="email" property="email" />
+		<result column="name" property="name" />
+		<result column="birth" property="birth" />
+		<result column="password" property="password" />
+		<result column="gender" property="gender" />
+		<result column="created_at" property="createdAt" />
+	</resultMap>
+
+	<resultMap type="tokenVO" id="tokenResult">
+		<result column="token" property="token" />
+		<result column="user_email" property="userEmail" />
+		<result column="created_at" property="createdAt" />
+	</resultMap>
+
+	<resultMap type="userAndProdVO" id="userAndProdResult">
+		<result column="email" property="email" />
+		<result column="created_at" property="createdAt" />
+		<association property="prod" resultMap="prodAndUserResult"></association>
+	</resultMap>		
+		
+	<resultMap type="prodVO" id="prodAndUserResult">		
+		<result column="no" property="no" />
+		<result column="name" property="name" />
+		<result column="thumbnail_url" property="thumbnailURL" />
+		<result column="origin_price" property="originPrice" />
+		<result column="disc_price" property="discPrice" />
+		<result column="description" property="description" />
+		<result column="created_at" property="createdAt" />
+	</resultMap>
+
+	<!-- email 중복 체크 -->
+	<select id="checkEmail" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) FROM user
+			WHERE email = #{email};
+		]]>
+	</select>
+
+	<!-- 7세 이하 가입 제한 -->
+	<!-- birth 값을 넣어주는데 # 대신 $을 넣어주어야 오류 없이 작동한다. https://stackoverflow.com/questions/52143140/org-apache-ibatis-type-typeexception-could-not-set-parameters-for-mapping-para -->
+	<select id="convertBirthToAge" resultType="int" parameterType="String">
+		<![CDATA[
+			SELECT FLOOR( (CAST(REPLACE(CURRENT_DATE, '-', '') AS UNSIGNED) - 
+       		CAST(REPLACE('${birth}', '-', '') AS UNSIGNED)) / 10000 );
+		]]>
+	</select>
+
+	<!-- 회원가입 -->
+	<insert id="createUser" parameterType="userVO"
+		keyProperty="email" useGeneratedKeys="true">
+		<![CDATA[
+			INSERT INTO user(email, name, birth, password, gender) 
+			VALUES(#{email}, #{name}, #{birth}, #{password}, #{gender});
+		]]>
+	</insert>
+
+	<!-- 회원정보 확인 -->
+	<select id="findUserByEmail" resultMap="userResult"
+		parameterType="String">
+		<![CDATA[
+			SELECT * FROM user
+			WHERE email = #{email};
+		]]>
+	</select>
+
+	<!-- 회원인지 확인 -->
+	<select id="findUser" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) FROM user
+			WHERE email = #{email} && password = #{password};
+		]]>
+	</select>
+
+	<!-- 토큰 있는지 확인 -->
+	<select id="checkEmailWithToken" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) FROM token
+			WHERE user_email = #{userEmail};
+		]]>
+	</select>
+
+	<!-- 새 로그인: 토큰생성 -->
+	<insert id="createToken" parameterType="tokenVO"
+		keyProperty="token" useGeneratedKeys="true">
+		<![CDATA[
+			INSERT INTO token(token, user_email)
+			VALUES(#{token}, #{userEmail});
+		]]>
+	</insert>
+
+	<!-- 새 로그인 -->
+	<select id="viewUserByToken" resultMap="tokenResult"
+		parameterType="String">
+		<![CDATA[
+			SELECT * FROM token
+			WHERE token = #{token};
+		]]>
+	</select>
+
+	<!-- 재 로그인 -->
+	<select id="viewTokenByEmail" resultMap="tokenResult"
+		parameterType="String">
+		<![CDATA[
+			SELECT * FROM token
+			WHERE user_email = #{userEmail};
+		]]>
+	</select>
+
+	<!-- 로그인 시 prod 조회 -->
+	<select id="viewProdByEmailAndNo" resultMap="userAndProdResult"
+		parameterType="userAndProdVO">
+		<![CDATA[
+			SELECT user.email, user.created_at, prod.* FROM user INNER JOIN prod WHERE user.email = #{email} && prod.no = #{no};
+		]]>
+	</select>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mybatis.mappers.prod">
+
+	<resultMap type="prodVO" id="prodResult">
+		<result column="no" property="no" />
+		<result column="name" property="name" />
+		<result column="thumbnail_url" property="thumbnailURL" />
+		<result column="origin_price" property="originPrice" />
+		<result column="disc_price" property="discPrice" />
+		<result column="description" property="description" />
+		<result column="created_at" property="createdAt" />
+	</resultMap>
+
+	<resultMap type="prodDetailVO" id="prodDetailResult">
+		<result column="no" property="no" />
+		<result column="prod_no" property="prodNo" />
+		<result column="content" property="content" />
+		<result column="image_url" property="imageURL" />
+		<result column="created_at" property="createdAt" />
+	</resultMap>
+
+	<!-- prod 정보 출력 -->
+	<select id="viewProdByNo" resultMap="prodResult"
+		parameterType="Long">
+		<![CDATA[
+			SELECT * FROM prod
+			WHERE no = #{no};
+		]]>
+	</select>
+
+	<!-- detail List 정보 출력 -->
+	<select id="viewProdWithDetail" resultMap="prodDetailResult"
+		parameterType="Long">
+		<![CDATA[
+			SELECT * FROM prod_detail WHERE prod_no = #{prodNo} ORDER BY created_at ASC;
+		]]>
+	</select>
+	
+	<!-- detail 정보 출력 -->
+	<select id="viewDetailByNoProdNo" resultMap="prodDetailResult"
+		parameterType="prodDetailVO">
+		<![CDATA[
+			SELECT * FROM prod_detail
+			WHERE no = #{no} && prod_no = #{prodNo};
+		]]>
+	</select>
+	
+	<!-- 페이지 당 6 상품 출력 -->
+	<select id="viewProdsOnPage" resultMap="prodResult" parameterType="Long">
+		<![CDATA[
+			SELECT P.* FROM
+				(SELECT prod.*
+				From prod
+				ORDER BY prod.no) P
+			LIMIT 6 OFFSET #{pageNo};
+		]]>
+	</select>
+	
+</mapper>
